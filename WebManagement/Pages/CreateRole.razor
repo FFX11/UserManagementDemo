@@ -1,0 +1,43 @@
+﻿@page "/createrole"
+@inject IAdminService AdminService
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+<h3>ListUsers</h3>
+
+@if (model is null)
+{
+    <p>Loading Roles...</p>
+}
+else
+{
+    <h1>Roles</h1>
+    <div class="row">
+        <div class="col-md-12">
+
+        </div>
+    </div>
+
+    <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label for="createrole">Create Role</label>
+    <InputText id="createrole" @bind-Value="model.RoleName" class="form-control"></InputText>
+
+    <button class="btn btn-primary my-2" type="submit">Create Role</button>
+    </EditForm>
+}
+
+@code
+{
+    private CreateRoleModel model = new();
+
+    private async void HandleSubmit()
+    {
+        await AdminService.CreateRole(model);
+
+        NavManager.NavigateTo("/listroles");
+    }
+}

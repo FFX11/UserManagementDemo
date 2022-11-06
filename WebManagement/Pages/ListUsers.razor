@@ -1,0 +1,57 @@
+﻿@page "/users"
+@inject IJSRuntime JsRuntime
+@inject IAdminService AdminService
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+<h3>Users</h3>
+
+@if (UserManager is null)
+{
+    
+    <div class="spinner-grow"></div>
+    <p>Loading Users...</p>
+}
+else
+{
+    <tr>
+        <td>Users</td>
+    </tr>
+    
+    @foreach (var user in UserManager.Users)
+    {
+        <div class="card-header">
+            User Id : @user.Id
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">@user.UserName</h5>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="(() => EditUser(user.Id))">Edit</button>
+            <button type="button" class="btn btn-primary" @onclick="(() => DeleteUser(user.Id))">Delete</button>
+        </div>
+    }
+}
+
+@code 
+{
+    protected async override Task OnInitializedAsync()
+    {
+        await AdminService.GetUsers();
+    }
+
+    private void EditUser(string id)
+    {
+        NavManager.NavigateTo($"/edituser/{id}");
+    }
+    private async Task DeleteUser(string id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure?");
+        if (confirmed)
+        {
+            await AdminService.DeleteRoleById(id);
+        }
+        
+    }
+}

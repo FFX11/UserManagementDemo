@@ -1,0 +1,33 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>WebManagement</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    Welcome @context.User.FindFirst(System.Security.Claims.ClaimTypes.Name).Value
+                    <NavLink class="nav-link" href="/logout">
+                        <span class="oi oi-account-logout"></span> Log Out
+                    </NavLink>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink class="nav-link" href="/login">
+                        <span class="oi oi-account-login"></span> Log In
+                    </NavLink>
+                    <NavLink class="nav-link" href="/register">
+                        <span class="oi oi-people"></span> Register
+                    </NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

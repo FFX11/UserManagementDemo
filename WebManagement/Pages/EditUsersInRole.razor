@@ -1,0 +1,68 @@
+﻿@page "/editusersinrole/{id}"
+@inject NavigationManager NavManager
+@inject IAdminService AuthService
+@attribute [Authorize(Roles ="Admin")]
+
+<div class="card-group">
+    <div class="card">
+        <div class="card-header">
+            <h2>Add or remove users from this role</h2>
+        </div>
+        <img class="card-img-top mx-4" src="https://d1nhio0ox7pgb.cloudfront.net/_img/v_collection_png/512x512/shadow/users3_add.png" style="max-width:120px;" alt="Card image cap">
+        <div class="card-body">
+            @foreach (var user in model)
+            {
+                <div class="form-check m-1">
+                    <input type="hidden" value="@user.UserId" />
+                    <input type="hidden" value="@user.UserName" />
+                    <label class="form-check-label" for="@user.UserId">
+                        @user.UserName
+                    </label>
+                    <input type="checkbox" class="form-check-input" id="@user.UserId"  @bind="@user.IsSelected" />
+                </div>
+            }
+            <div class="form-check m-1"></div>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-primary" type="submit" @onclick="UpdateRole">Update</button>
+            <button class="btn btn-warning" type="button" @onclick="@EditRole">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@code 
+{
+    [Parameter]
+    public string Id { get; set; }
+    private List<UserRoleModel> model = new();
+    private string error = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await AuthService.EditUsersToRole(model, Id);
+
+        var result = await AuthService.EditUserInRole(Id);
+
+        if (result != null)
+        {
+            model = result;
+
+        }
+
+    }
+
+    private async Task UpdateRole()
+    {
+        await AuthService.EditUsersToRole(model, Id);
+
+
+        NavManager.NavigateTo($"editrole/{Id}");
+    }
+
+    private void EditRole()
+    {
+        NavManager.NavigateTo($"editrole/{Id}");
+    }
+
+
+}

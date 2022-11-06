@@ -1,0 +1,85 @@
+﻿@page "/editrole/{id}"
+@inject IAdminService AdminService
+@inject NavigationManager navManager
+@inject ILogger<EditRole> Logger
+@attribute [Authorize(Roles = "Admin,User")]
+
+<EditForm Model="model" OnValidSubmit="Update">
+
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <form class="mt-3">
+        <div class="form row">
+            <label for="Id" class="col-sm-2 col-form-label">Id</label>
+            <div class="col-sm-10">
+                <input for="Id" disabled class="form-control" style="width:400px" @bind-value=@model.Id />
+            </div>
+            <div class="form row">
+                <label for="RoleName" class="col-sm-2 col-form-label">RoleName</label>
+                <div class="col-sm-10 my-1">
+                    <input for="RoleName" class="form-control mx-1" style="width:400px" @bind-value=@model.RoleName />
+                    <ValidationMessage For="@(()=> model.RoleName)"/>
+                </div>
+            </div>
+
+            <div class="form row">
+                <div class="col-ms-10">
+                    <button type="submit" class="btn btn-danger" @onclick="Update">Update Role</button>
+                    <button type="button" class="btn btn-warning" @onclick="Cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Users in this role</h3>
+            </div>
+            <div class="card-body">
+                @if (model.Users.Any())
+                {
+                    foreach (var user in model.Users)
+                    {
+                        <h1 class="card-title">@user</h1>
+                    }
+                }
+                else
+                {
+                    <h5 class="card-title"> None at the moment</h5>
+                }
+            </div>
+            <div class="card-footer">
+                <a  class="btn btn-primary" @onclick="(()=>EditUsersInRole())">Add or remove ussers</a>
+            </div>
+        </div>
+    </form>
+</EditForm>
+
+
+@code 
+{
+    [Parameter]
+    public string Id { get; set; }
+
+    private EditRoleModel model = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        model = await AdminService.GetRoleById(Id);
+    }
+
+    private void Cancel()
+    {
+        navManager.NavigateTo("listroles");
+    }
+
+    private void EditUsersInRole()
+    {
+        navManager.NavigateTo($"editusersinrole/{Id}");
+    }
+   
+    private async Task Update()
+    {
+         await AdminService.EditRole(model);
+    }
+}

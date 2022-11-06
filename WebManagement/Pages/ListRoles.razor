@@ -1,0 +1,76 @@
+﻿@page "/listroles"
+@inject IJSRuntime JsRuntime
+@inject IAdminService AdminService
+@inject IEnumerable<RoleManager<IdentityRole>> IdentityRole
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+<h3>ListRoles</h3>
+
+
+@foreach (var roleManager in IdentityRole)
+{
+    <button class="btn btn-primary" @onclick="@CreateRole">Create Role</button>
+    if (roleManager.Roles.Any())
+    {
+        foreach (var role in roleManager.Roles)
+        {
+            
+            <div class="card-body bg-white">
+                <div class="card mb-3">
+                    Role Id : @role.Id
+                </div>
+                <h5 class="card-title">@role.Name</h5>
+            </div>
+            <div class="card-footer bg-white">
+                <button class="btn btn-primary" @onclick="(() => EditRole(role.Id))"><i class="oi oi-pencil"></i></button>
+                <button type="button" class="btn btn-danger" @onclick="(() => DeleteRole(role.Id))">Delete</button>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                No roles created yet
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    Use the button blew to create a role
+                </h5>
+                <button class="btn btn-primary" style="width:auto" @onclick="@CreateRole">Create Role</button>
+            </div>
+        </div>
+    }
+}
+
+
+
+@code
+{
+    protected async override Task OnInitializedAsync()
+    {
+        await AdminService.GetRoles();
+    }
+
+    private void CreateRole()
+    {
+        NavManager.NavigateTo("createrole");
+    }
+
+    private void EditRole(string id)
+    {
+        NavManager.NavigateTo($"editrole/{id}");
+    }
+
+    private async Task DeleteRole(string id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure?");
+        if (confirmed)
+        {
+            await AdminService.DeleteUser(id);
+        }
+        await AdminService.DeleteRoleById(id);
+
+    }
+}

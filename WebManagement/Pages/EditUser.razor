@@ -1,0 +1,136 @@
+﻿@page "/edituser/{id}"
+@inject NavigationManager NavManager
+@inject IAdminService AdminService
+@attribute [Authorize]
+
+
+<h1>Edit User</h1>
+
+@if (model is null)
+{
+    <h1>Loading...</h1>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleSubmit">
+
+        <DataAnnotationsValidator/>
+        <ValidationSummary />
+
+        <div class="form-check mt-3">
+            <div class="col-form-label row">
+                <label id="id" class="col-sm-2 col-form-label">Id</label>
+                <div class="col-sm-10">
+                    <input for="id" disabled class="form-control my-1" style="" @bind-value="@model.Id" />
+                </div>
+
+                <div class="form-group row">
+                    <label id="email" class="col-sm-2 col-form-label">Email</label>
+                    <div class="col-sm-10">
+                        <input for="email" class="form-control my-1 mx-1" @bind-value="@model.Email" />
+                        <ValidationMessage For="@(()=> model.Email)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label id="user" class="col-sm-2 col-form-label">User</label>
+                    <div class="col-sm-10">
+                        <input for="user" class="form-control my-1 mx-1" @bind-value="@model.UserName" />
+                        <ValidationMessage For="@(()=> model.UserName)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label id="city" class="col-sm-2 col-form-label">City</label>
+                    <div class="col-sm-10">
+                        <input for="city" class="form-control my-1 mx-1" @bind-value="@model.City" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary my-1">Update</button>
+                        <button type="button" class="btn btn-primary my-1" @onclick="Cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>User Roles</h3>
+                </div>
+                <div class="card-body">
+                    @if (model.Roles != null && model.Roles.Count > 0)
+                    {
+                        foreach (var role in model.Roles)
+                        {
+                            <h5 class="card-title">@role</h5>
+                        }
+                    }
+                    else
+                    {
+                        <h5 class="card-title">None at the moment</h5>
+                    }
+                </div>
+                <div class="card-footer">
+                    <button type="button" style="width:auto" class="btn btn-primary">Manage Roles</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>User Claims</h3>
+                </div>
+                <div class="card-body">
+                    @if (model.Claims.Count > 0 && model.Claims != null)
+                    {
+                        foreach (var claim in model.Claims)
+                        {
+                            <h5 class="card-title">@claim</h5>
+                        }
+                    }
+                    else
+                    {
+                        <h5 class="card-title">None at the moment</h5>
+                    }
+                </div>
+                <div class="card-footer">
+                    <button type="button" style="width:auto" class="btn btn-primary">Manage Claims</button>
+                </div>
+            </div>
+
+        </div>
+        
+    </EditForm>
+}
+
+@code 
+{
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+    private EditUserModel model = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var result = await AdminService.EditUser(Id);
+
+        if (result != null)
+        {
+            model = result;
+        }
+    }
+
+    private void Update()
+    {
+
+    }
+
+    private void Cancel()
+    {
+        NavManager.NavigateTo("/users");
+    }
+    private async Task<EditUserModel> HandleSubmit()
+    {
+        var res =  await AdminService.EditSaveUser(model);
+        model = res;
+
+        return model;
+    }
+
+}
